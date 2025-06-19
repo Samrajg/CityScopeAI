@@ -60,7 +60,7 @@ user_query = st.text_input("✍️ Ask something about Tamil Nadu's districts:")
 # === Clear All Button ===
 if st.button("🧹 Clear All"):
     st.session_state.history = []
-    st.experimental_rerun()
+    st.rerun()  # ✅ Fixed for Streamlit Cloud
 
 # === Prediction Logic ===
 if user_query:
