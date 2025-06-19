@@ -11,14 +11,14 @@ Original file is located at
 
 import streamlit as st
 import pandas as pd
-import numpy as np
 import joblib
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier  # or whatever model you're using
+import random
 
+# === Setup ===
 st.set_page_config(page_title="CityScope AI", layout="centered")
+st.title("🏙️ CityScope AI Chatbot")
 
-# === Load model and vectorizer ===
+# === Load model and data ===
 model = joblib.load("model.pkl")
 vectorizer = joblib.load("vectorizer.pkl")
 data = pd.read_excel("cityscopedata.xlsx")
@@ -26,20 +26,37 @@ data = pd.read_excel("cityscopedata.xlsx")
 questions = data['Question'].astype(str).tolist()
 answers = data['Answer'].astype(str).tolist()
 
-# === Streamlit UI ===
-st.set_page_config(page_title="CityScope AI", layout="centered")
-st.title("🏙️ CityScope AI Chatbot")
+# === Fixed English Question Tips ===
+english_tips = [
+    "What is the population of Namakkal district?",
+    "How many villages are there in Tirunelveli?",
+    "Tell me about healthcare facilities in Madurai.",
+    "What are the key educational institutions in Salem?",
+    "Is Coimbatore more urban or rural?",
+    "How many towns are in Kanyakumari?",
+    "What industries are famous in Thoothukudi?"
+]
 
-user_query = st.text_input("Ask something about Tamil Nadu's districts:")
+random.shuffle(english_tips)
 
+with st.expander("💡 Question Tips (Click to expand)", expanded=True):
+    st.markdown("Try asking:")
+    for tip in english_tips:
+        st.markdown(f"- {tip}")
+    st.button("🔁 Refresh Tips", on_click=st.rerun)
+
+# === User Input ===
+user_query = st.text_input("✍️ Ask something about Tamil Nadu's districts:")
+
+# === Clear Button ===
+if st.button("🧹 Clear All"):
+    st.experimental_rerun()
+
+# === Answer Output ===
 if user_query:
-    # Vectorize user query
     query_vec = vectorizer.transform([user_query])
-
-    # Find nearest neighbor
     dist, index = model.kneighbors(query_vec, n_neighbors=1)
     matched_index = index[0][0]
 
-    # Return answer
     st.markdown("### 🧠 Answer:")
     st.success(answers[matched_index])
