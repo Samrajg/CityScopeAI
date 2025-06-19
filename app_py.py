@@ -9,11 +9,13 @@ Original file is located at
 
 # 📄 app.py — CityScope AI Chatbot
 pip install streamlit
-
 import streamlit as st
 import pandas as pd
-import joblib
-from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier  # or whatever model you're using
+
+st.set_page_config(page_title="CityScope AI", layout="centered")
 
 # === Load model and vectorizer ===
 model = joblib.load("model.pkl")
