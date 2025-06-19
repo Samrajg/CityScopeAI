@@ -2,3 +2,5 @@ streamlit
 pandas
 scikit-learn
 numpy
+joblib
+openpyxl   # ✅ Required to read Excel files
