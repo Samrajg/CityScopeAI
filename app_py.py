@@ -21,6 +21,22 @@ except Exception as e:
 questions = data['Question'].astype(str).tolist()
 answers = data['Answer'].astype(str).tolist()
 
+# === Chat Input
+with st.form("chat_form", clear_on_submit=True):
+    user_query = st.text_input("💬 Ask about Tamil Nadu’s districts:", placeholder="Type your question here...")
+    submitted = st.form_submit_button("Send")
+
+# === Run Prediction
+if submitted and user_query:
+    try:
+        query_vec = vectorizer.transform([user_query])
+        dist, index = model.kneighbors(query_vec, n_neighbors=1)
+        matched_index = index[0][0]
+        answer = answers[matched_index]
+        st.session_state.history.append((user_query, answer))
+        st.rerun()  # To show updated chat instantly
+    except Exception as e:
+        st.error("⚠️ Failed to process your question.")
 # === English Tips (fixed)
 english_tips = [
     "What is the population of Namakkal district?",
@@ -67,19 +83,4 @@ with chat_container:
         </div>
         """, unsafe_allow_html=True)
 
-# === Chat Input
-with st.form("chat_form", clear_on_submit=True):
-    user_query = st.text_input("💬 Ask about Tamil Nadu’s districts:", placeholder="Type your question here...")
-    submitted = st.form_submit_button("Send")
 
-# === Run Prediction
-if submitted and user_query:
-    try:
-        query_vec = vectorizer.transform([user_query])
-        dist, index = model.kneighbors(query_vec, n_neighbors=1)
-        matched_index = index[0][0]
-        answer = answers[matched_index]
-        st.session_state.history.append((user_query, answer))
-        st.rerun()  # To show updated chat instantly
-    except Exception as e:
-        st.error("⚠️ Failed to process your question.")
