@@ -75,12 +75,13 @@ chat_container = st.container()
 with chat_container:
     for i, (q, a) in enumerate(st.session_state.history):
         st.markdown(f"""
-        <div style='padding:10px; margin-bottom:10px; background-color:#f1f3f6; border-radius:10px'>
+        <div style='padding:10px; margin-bottom:10px; background-color:#f1f3f6; border-radius:10px; color:#000000;'>
             <b>🧑‍💼 You:</b><br>{q}
         </div>
-        <div style='padding:10px; margin-bottom:20px; background-color:#d9fdd3; border-radius:10px'>
+        <div style='padding:10px; margin-bottom:20px; background-color:#d9fdd3; border-radius:10px; color:#000000;'>
             <b>🤖 CityScope AI:</b><br>{a}
         </div>
         """, unsafe_allow_html=True)
+
 
 
