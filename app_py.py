@@ -9,21 +9,25 @@ Original file is located at
 
 # 📄 app.py — CityScope AI Chatbot
 
-
 import streamlit as st
 import pandas as pd
 import joblib
 import random
 
-# === Setup ===
+# === Page Setup ===
 st.set_page_config(page_title="CityScope AI", layout="centered")
 st.title("🏙️ CityScope AI Chatbot")
 
 # === Load model and data ===
-model = joblib.load("model.pkl")
-vectorizer = joblib.load("vectorizer.pkl")
-data = pd.read_excel("cityscopedata.xlsx")
+try:
+    model = joblib.load("model.pkl")
+    vectorizer = joblib.load("vectorizer.pkl")
+    data = pd.read_excel("cityscopedata.xlsx")
+except Exception as e:
+    st.error("❌ Failed to load model or data. Please check file paths or re-upload.")
+    st.stop()
 
+# === Prepare questions and answers ===
 questions = data['Question'].astype(str).tolist()
 answers = data['Answer'].astype(str).tolist()
 
@@ -37,27 +41,43 @@ english_tips = [
     "How many towns are in Kanyakumari?",
     "What industries are famous in Thoothukudi?"
 ]
-
 random.shuffle(english_tips)
 
+# === Question Tips UI ===
 with st.expander("💡 Question Tips (Click to expand)", expanded=True):
     st.markdown("Try asking:")
     for tip in english_tips:
         st.markdown(f"- {tip}")
     st.button("🔁 Refresh Tips", on_click=st.rerun)
 
-# === User Input ===
+# === Initialize session state for history ===
+if "history" not in st.session_state:
+    st.session_state.history = []
+
+# === Input UI ===
 user_query = st.text_input("✍️ Ask something about Tamil Nadu's districts:")
 
-# === Clear Button ===
+# === Clear All Button ===
 if st.button("🧹 Clear All"):
+    st.session_state.history = []
     st.experimental_rerun()
 
-# === Answer Output ===
+# === Prediction Logic ===
 if user_query:
-    query_vec = vectorizer.transform([user_query])
-    dist, index = model.kneighbors(query_vec, n_neighbors=1)
-    matched_index = index[0][0]
+    try:
+        query_vec = vectorizer.transform([user_query])
+        dist, index = model.kneighbors(query_vec, n_neighbors=1)
+        matched_index = index[0][0]
+        answer = answers[matched_index]
+        st.session_state.history.append((user_query, answer))
+    except Exception as e:
+        st.error("⚠️ Could not process the query. Please check the model/vectorizer.")
+        st.stop()
 
-    st.markdown("### 🧠 Answer:")
-    st.success(answers[matched_index])
+# === Display History ===
+if st.session_state.history:
+    st.markdown("### 🕘 Conversation History")
+    for i, (q, a) in enumerate(reversed(st.session_state.history), 1):
+        st.markdown(f"**Q{i}:** {q}")
+        st.markdown(f"✅ **A{i}:** {a}")
+        st.markdown("---")
