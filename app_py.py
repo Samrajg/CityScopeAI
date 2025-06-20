@@ -1,47 +1,43 @@
-# 📄 app.py — CityScope AI (Clean UI, No APIs, No dataset)
+# 📄 app.py — CityScope AI Chatbot with ChatGPT-style UI
 
 import streamlit as st
+import pandas as pd
+import joblib
 import random
 
 # === Page Setup ===
 st.set_page_config(page_title="CityScope AI", layout="centered")
 st.title("🏙️ CityScope AI Chatbot")
 
-# === Response Engine ===
-def generate_answer(query):
-    query_lower = query.lower()
-    if "population" in query_lower:
-        return "Tamil Nadu's population varies by district. You can ask about a specific district like Chennai or Madurai."
-    elif "villages" in query_lower:
-        return "Districts like Namakkal, Salem, and Tirunelveli have hundreds of villages with rich culture and agriculture."
-    elif "education" in query_lower:
-        return "Tamil Nadu offers excellent education with government schools, private institutions, and famous colleges."
-    elif "health" in query_lower:
-        return "The state provides healthcare via PHCs, district hospitals, and special schemes like Amma clinics."
-    elif "industries" in query_lower:
-        return "Coimbatore is known for textiles, Chennai for IT & automotive, and Salem for steel industries."
-    elif "weather" in query_lower:
-        return "Tamil Nadu has a tropical climate. Summers are hot, monsoons are moderate, and winters are mild."
-    else:
-        return "Please ask about population, healthcare, education, industries, villages, or weather in any Tamil Nadu district."
+# === Load model and data ===
+try:
+    model = joblib.load("model.pkl")
+    vectorizer = joblib.load("vectorizer.pkl")
+    data = pd.read_excel("cityscopedata.xlsx")
+except Exception as e:
+    st.error("❌ Failed to load model or data. Please check file paths or re-upload.")
+    st.stop()
 
-# === Question Tips
-tips = [
-    "What is the population of Chennai?",
-    "Tell me about healthcare in Madurai.",
-    "What industries are popular in Coimbatore?",
-    "How many villages are in Salem?",
-    "Are there good colleges in Tirunelveli?",
-    "What's the weather like in Kanyakumari?",
-    "Tell me something about education in Erode."
+questions = data['Question'].astype(str).tolist()
+answers = data['Answer'].astype(str).tolist()
+
+# === English Tips (fixed)
+english_tips = [
+    "What is the population of Namakkal district?",
+    "How many villages are there in Tirunelveli?",
+    "Tell me about healthcare facilities in Madurai.",
+    "What are the key educational institutions in Salem?",
+    "Is Coimbatore more urban or rural?",
+    "How many towns are in Kanyakumari?",
+    "What industries are famous in Thoothukudi?"
 ]
-random.shuffle(tips)
+random.shuffle(english_tips)
 
-# === Session State
+# === Session state for chat history
 if "history" not in st.session_state:
     st.session_state.history = []
 
-# === Header Buttons
+# === Sidebar or top buttons
 col1, col2 = st.columns([1, 4])
 with col1:
     if st.button("🧹 Clear Chat"):
@@ -51,32 +47,39 @@ with col2:
     if st.button("🔁 Refresh Tips"):
         st.rerun()
 
-# === Tips UI
-with st.expander("💡 Try asking these questions"):
-    for tip in tips:
+# === Tips Section
+with st.expander("💡 Need help? Try these:", expanded=True):
+    for tip in english_tips:
         st.markdown(f"- {tip}")
 
-# === Chat History
+# === Conversation Display
 st.markdown("## 🧠 Chat History")
+
 chat_container = st.container()
 with chat_container:
-    for q, a in st.session_state.history:
+    for i, (q, a) in enumerate(st.session_state.history):
         st.markdown(f"""
-        <div style='padding:10px; margin-bottom:10px; background-color:#f1f3f6; border-radius:10px; color:#000000;'>
+        <div style='padding:10px; margin-bottom:10px; background-color:#f1f3f6; border-radius:10px'>
             <b>🧑‍💼 You:</b><br>{q}
         </div>
-        <div style='padding:10px; margin-bottom:20px; background-color:#d9fdd3; border-radius:10px; color:#000000;'>
+        <div style='padding:10px; margin-bottom:20px; background-color:#d9fdd3; border-radius:10px'>
             <b>🤖 CityScope AI:</b><br>{a}
         </div>
         """, unsafe_allow_html=True)
 
 # === Chat Input
 with st.form("chat_form", clear_on_submit=True):
-    user_query = st.text_input("💬 Ask your question about Tamil Nadu districts:", placeholder="Type here...")
+    user_query = st.text_input("💬 Ask about Tamil Nadu’s districts:", placeholder="Type your question here...")
     submitted = st.form_submit_button("Send")
 
-# === Chat Response
+# === Run Prediction
 if submitted and user_query:
-    answer = generate_answer(user_query)
-    st.session_state.history.append((user_query, answer))
-    st.rerun()
+    try:
+        query_vec = vectorizer.transform([user_query])
+        dist, index = model.kneighbors(query_vec, n_neighbors=1)
+        matched_index = index[0][0]
+        answer = answers[matched_index]
+        st.session_state.history.append((user_query, answer))
+        st.rerun()  # To show updated chat instantly
+    except Exception as e:
+        st.error("⚠️ Failed to process your question.")
