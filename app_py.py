@@ -1,4 +1,4 @@
-# 📄 app.py — CityScope AI (No location, No dataset, ChatGPT-style UI)
+# 📄 app.py — CityScope AI (Clean UI, No APIs, No dataset)
 
 import streamlit as st
 import random
@@ -7,33 +7,33 @@ import random
 st.set_page_config(page_title="CityScope AI", layout="centered")
 st.title("🏙️ CityScope AI Chatbot")
 
-# === Template Answer Logic
+# === Response Engine ===
 def generate_answer(query):
     query_lower = query.lower()
     if "population" in query_lower:
-        return "Population data varies by district. You can refer to the Tamil Nadu Census portal for up-to-date info."
+        return "Tamil Nadu's population varies by district. You can ask about a specific district like Chennai or Madurai."
     elif "villages" in query_lower:
-        return "Tamil Nadu has thousands of villages, each rich in culture and heritage. Specify a district for more."
+        return "Districts like Namakkal, Salem, and Tirunelveli have hundreds of villages with rich culture and agriculture."
     elif "education" in query_lower:
-        return "Tamil Nadu is known for high literacy and numerous institutions. Major cities have top colleges and schools."
+        return "Tamil Nadu offers excellent education with government schools, private institutions, and famous colleges."
     elif "health" in query_lower:
-        return "Each district has government hospitals, PHCs, and health centers. The state also runs Amma clinics in cities."
+        return "The state provides healthcare via PHCs, district hospitals, and special schemes like Amma clinics."
     elif "industries" in query_lower:
-        return "Industries vary by district: Coimbatore for textiles, Hosur for electronics, and Chennai for IT."
+        return "Coimbatore is known for textiles, Chennai for IT & automotive, and Salem for steel industries."
     elif "weather" in query_lower:
-        return "Tamil Nadu has a tropical climate with hot summers and monsoon rains. Specific data depends on the district."
+        return "Tamil Nadu has a tropical climate. Summers are hot, monsoons are moderate, and winters are mild."
     else:
-        return "I can help you with Tamil Nadu's districts. Ask about population, healthcare, education, industries, etc."
+        return "Please ask about population, healthcare, education, industries, villages, or weather in any Tamil Nadu district."
 
 # === Question Tips
 tips = [
-    "What is the population of Namakkal district?",
+    "What is the population of Chennai?",
     "Tell me about healthcare in Madurai.",
-    "What industries are famous in Thoothukudi?",
-    "How many villages are in Tirunelveli?",
-    "Are there good schools in Coimbatore?",
+    "What industries are popular in Coimbatore?",
+    "How many villages are in Salem?",
+    "Are there good colleges in Tirunelveli?",
     "What's the weather like in Kanyakumari?",
-    "Tell me something about education in Salem."
+    "Tell me something about education in Erode."
 ]
 random.shuffle(tips)
 
@@ -41,7 +41,7 @@ random.shuffle(tips)
 if "history" not in st.session_state:
     st.session_state.history = []
 
-# === Buttons
+# === Header Buttons
 col1, col2 = st.columns([1, 4])
 with col1:
     if st.button("🧹 Clear Chat"):
@@ -51,8 +51,8 @@ with col2:
     if st.button("🔁 Refresh Tips"):
         st.rerun()
 
-# === Tips Display
-with st.expander("💡 Question Tips"):
+# === Tips UI
+with st.expander("💡 Try asking these questions"):
     for tip in tips:
         st.markdown(f"- {tip}")
 
@@ -60,7 +60,7 @@ with st.expander("💡 Question Tips"):
 st.markdown("## 🧠 Chat History")
 chat_container = st.container()
 with chat_container:
-    for i, (q, a) in enumerate(st.session_state.history):
+    for q, a in st.session_state.history:
         st.markdown(f"""
         <div style='padding:10px; margin-bottom:10px; background-color:#f1f3f6; border-radius:10px; color:#000000;'>
             <b>🧑‍💼 You:</b><br>{q}
@@ -72,10 +72,10 @@ with chat_container:
 
 # === Chat Input
 with st.form("chat_form", clear_on_submit=True):
-    user_query = st.text_input("💬 Ask about Tamil Nadu’s districts:", placeholder="Type your question here...")
+    user_query = st.text_input("💬 Ask your question about Tamil Nadu districts:", placeholder="Type here...")
     submitted = st.form_submit_button("Send")
 
-# === Answering Logic
+# === Chat Response
 if submitted and user_query:
     answer = generate_answer(user_query)
     st.session_state.history.append((user_query, answer))
