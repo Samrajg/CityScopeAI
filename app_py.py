@@ -1,60 +1,43 @@
-# 📄 app.py — CityScope AI (Live location-based, no dataset)
+# 📄 app.py — CityScope AI (No location, No dataset, ChatGPT-style UI)
 
 import streamlit as st
-import requests
 import random
 
 # === Page Setup ===
 st.set_page_config(page_title="CityScope AI", layout="centered")
 st.title("🏙️ CityScope AI Chatbot")
 
-# === Location Detection via IP
-def get_location():
-    try:
-        res = requests.get("https://ipinfo.io/json")
-        data = res.json()
-        loc = data.get("loc", "")
-        city = data.get("city", "")
-        region = data.get("region", "")
-        return loc, city, region
-    except:
-        return None, None, None
-
-location, city, region = get_location()
-
 # === Template Answer Logic
-def generate_answer(query, city, region):
-    if not city:
-        return "Sorry, I couldn't detect your location. Please try again later."
+def generate_answer(query):
     query_lower = query.lower()
     if "population" in query_lower:
-        return f"The population data for {city} is currently being updated. Please check the census portal for {region}."
+        return "Population data varies by district. You can refer to the Tamil Nadu Census portal for up-to-date info."
     elif "villages" in query_lower:
-        return f"{city} district in {region} has several villages known for agriculture and cultural heritage."
+        return "Tamil Nadu has thousands of villages, each rich in culture and heritage. Specify a district for more."
     elif "education" in query_lower:
-        return f"{city} has a range of educational institutions, including government schools and colleges in {region}."
+        return "Tamil Nadu is known for high literacy and numerous institutions. Major cities have top colleges and schools."
     elif "health" in query_lower:
-        return f"{city} is served by public health centers and district hospitals under Tamil Nadu Health Dept."
+        return "Each district has government hospitals, PHCs, and health centers. The state also runs Amma clinics in cities."
     elif "industries" in query_lower:
-        return f"{city} in {region} is known for textiles, small-scale industries, and local manufacturing units."
+        return "Industries vary by district: Coimbatore for textiles, Hosur for electronics, and Chennai for IT."
     elif "weather" in query_lower:
-        return f"{city} generally experiences a tropical climate with moderate rainfall across {region}."
+        return "Tamil Nadu has a tropical climate with hot summers and monsoon rains. Specific data depends on the district."
     else:
-        return f"I'm here to help with district-level info for {city}, {region}. Please ask about population, health, education, etc."
+        return "I can help you with Tamil Nadu's districts. Ask about population, healthcare, education, industries, etc."
 
 # === Question Tips
 tips = [
-    "What is the population of my district?",
-    "Tell me about healthcare in my area.",
-    "What industries are common here?",
-    "Give me info about villages in my district.",
-    "What's the weather like here?",
-    "Are there good schools in my city?",
-    "Tell me something about this region."
+    "What is the population of Namakkal district?",
+    "Tell me about healthcare in Madurai.",
+    "What industries are famous in Thoothukudi?",
+    "How many villages are in Tirunelveli?",
+    "Are there good schools in Coimbatore?",
+    "What's the weather like in Kanyakumari?",
+    "Tell me something about education in Salem."
 ]
 random.shuffle(tips)
 
-# === Session for chat history
+# === Session State
 if "history" not in st.session_state:
     st.session_state.history = []
 
@@ -68,17 +51,12 @@ with col2:
     if st.button("🔁 Refresh Tips"):
         st.rerun()
 
-# === Show Location
-if city and region:
-    st.markdown(f"📍 **Detected Location**: `{city}, {region}`")
-    st.info(f"💡 You can ask about `{city}` or your current region.")
-
-# === Show Tips
+# === Tips Display
 with st.expander("💡 Question Tips"):
     for tip in tips:
         st.markdown(f"- {tip}")
 
-# === Chat Display
+# === Chat History
 st.markdown("## 🧠 Chat History")
 chat_container = st.container()
 with chat_container:
@@ -94,11 +72,11 @@ with chat_container:
 
 # === Chat Input
 with st.form("chat_form", clear_on_submit=True):
-    user_query = st.text_input("💬 Ask about your district or region:", placeholder="Type your question here...")
+    user_query = st.text_input("💬 Ask about Tamil Nadu’s districts:", placeholder="Type your question here...")
     submitted = st.form_submit_button("Send")
 
 # === Answering Logic
 if submitted and user_query:
-    answer = generate_answer(user_query, city, region)
+    answer = generate_answer(user_query)
     st.session_state.history.append((user_query, answer))
     st.rerun()
