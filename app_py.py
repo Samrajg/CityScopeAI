@@ -1,4 +1,5 @@
 # 📄 app.py — CityScope AI Chatbot (Clean, Voice-Free)
+pip install matplotlib
 
 import streamlit as st
 import pandas as pd
