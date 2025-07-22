@@ -1,11 +1,9 @@
-# 📄 app.py — CityScope AI Chatbot with ChatGPT-style UI
-pip install gTTS
+# 📄 app.py — CityScope AI Chatbot (Clean, Voice-Free)
 
 import streamlit as st
 import pandas as pd
 import joblib
 import random
-from gtts import gTTS
 import base64
 import matplotlib.pyplot as plt
 import io
@@ -113,24 +111,6 @@ if submitted and user_query:
         filtered_match = [i for i in index[0] if i in filtered_indexes][0]
         matched_index = filtered_match
         answer = answers[matched_index]
-
-        # === Voice Output (Feature 1)
-        def text_to_speech(text):
-            try:
-                tts = gTTS(text)
-                tts.save("voice.mp3")
-                audio_file = open("voice.mp3", "rb")
-                audio_bytes = audio_file.read()
-                audio_base64 = base64.b64encode(audio_bytes).decode()
-                audio_html = f"""
-                <audio autoplay>
-                    <source src="data:audio/mp3;base64,{audio_base64}" type="audio/mp3">
-                </audio>
-                """
-                st.markdown(audio_html, unsafe_allow_html=True)
-            except:
-                st.warning("🔇 Voice output unavailable.")
-        text_to_speech(answer)
 
         # === Smart Confidence Feedback (Feature 2)
         if dist[0][0] > 1.0:
