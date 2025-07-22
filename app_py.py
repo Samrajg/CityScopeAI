@@ -1,4 +1,5 @@
 # 📄 app.py — CityScope AI Chatbot with ChatGPT-style UI
+pip install gTTS
 
 import streamlit as st
 import pandas as pd
