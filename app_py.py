@@ -1,14 +1,11 @@
-# 📄 app.py — CityScope AI Chatbot (Clean, Voice-Free)
-pip install matplotlib
+# 📄 app.py — CityScope AI Chatbot (Cleaned — No Voice, No Matplotlib)
 
 import streamlit as st
 import pandas as pd
 import joblib
 import random
-import base64
-import matplotlib.pyplot as plt
-import io
 import os
+import base64
 
 # === Page Setup ===
 st.set_page_config(page_title="CityScope AI", layout="centered")
@@ -123,7 +120,7 @@ if submitted and user_query:
         district_keywords = ["chennai", "madurai", "coimbatore", "salem", "namakkal", "tirunelveli", "kanyakumari"]
         for d in district_keywords:
             if d in user_query.lower():
-                map_path = f"maps/{d}.png"  # Place images in /maps
+                map_path = f"maps/{d}.png"
                 if os.path.exists(map_path):
                     st.image(map_path, caption=f"{d.title()} District Map", use_column_width=True)
                 break
@@ -167,14 +164,3 @@ with st.expander("🏆 District Rankings"):
     }
     df_rank = pd.DataFrame(ranking_data)
     st.table(df_rank)
-
-# === Data Trend Charts (Feature 20)
-with st.expander("📉 Population Trend Demo"):
-    years = [2011, 2015, 2021]
-    population = [7.1, 7.5, 8.2]
-    fig, ax = plt.subplots()
-    ax.plot(years, population, marker='o')
-    ax.set_title("Chennai Population Growth")
-    ax.set_xlabel("Year")
-    ax.set_ylabel("Millions")
-    st.pyplot(fig)
