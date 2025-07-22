@@ -5,3 +5,4 @@ numpy
 joblib
 openpyxl   # ✅ Required to read Excel files
 requests
+gTTS==2.5.1
